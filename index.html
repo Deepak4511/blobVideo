@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5 Best Unturned Hosting Providers In 2025</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Verdana', sans-serif;
+        }
+
+        #video-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Cinematic Text Overlay */
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            text-shadow: 2px 2px 0px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        }
+
+        .title-slide {
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            transform: scale(0.9);
+            transition: transform 3s ease-out, opacity 1s;
+        }
+
+        .title-slide.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        h1 {
+            color: #FFD700; /* Gold */
+            font-size: 4rem;
+            margin: 0;
+            text-transform: uppercase;
+            font-weight: 900;
+            letter-spacing: 2px;
+            font-family: 'Impact', sans-serif; /* Blocky font */
+        }
+
+        h2 {
+            color: #fff;
+            font-size: 2rem;
+            margin-top: 10px;
+        }
+
+        .host-rank {
+            font-size: 8rem;
+            color: rgba(255, 255, 255, 0.2);
+            position: absolute;
+            top: 10%;
+            left: 5%;
+            font-weight: bold;
+        }
+
+        .host-name {
+            font-size: 5rem;
+            color: #fff;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .host-feature {
+            font-size: 2.5rem;
+            color: #4CAF50; /* Unturned Green */
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 30px;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: inline-block;
+        }
+
+        /* Progress Bar */
+        #progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 5px;
+            background-color: #FF0000;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* Controls */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            pointer-events: all;
+            z-index: 10;
+        }
+
+        button {
+            background: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            border: 2px solid #fff;
+            box-shadow: 2px 2px 0px #000;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        /* Grain effect for video feel */
+        .film-grain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* Intro/Outro specifics */
+        .big-logo {
+            font-size: 8rem;
+            color: #96c93d; /* Unturned-ish Green */
+            font-family: 'Impact', sans-serif;
+            text-shadow: 4px 4px 0px #3e5c26, 6px 6px 0px #000;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="video-container">
+        <div id="canvas-container"></div>
+        <div class="film-grain"></div>
+        
+        <div id="overlay">
+            <!-- Dynamic Content Injected Here -->
+        </div>
+
+        <div id="progress-bar"></div>
+
+        <div id="controls">
+            <button id="replay-btn" style="display:none;">Replay Video</button>
+            <button id="pause-btn">Pause</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const providers = [
+            { name: "SparkedHost", feature: "Best Overall & Price", rank: "#1" },
+            { name: "Pine Hosting", feature: "Top Community Choice", rank: "#2" },
+            { name: "GTXGaming", feature: "Beginner Friendly", rank: "#3" },
+            { name: "GravelHost", feature: "Best Free Options", rank: "#4" },
+            { name: "Apex Hosting", feature: "High Performance", rank: "#5" }
+        ];
+
+        // --- THREE.JS SETUP ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // Sky Blue
+        scene.fog = new THREE.Fog(0x87CEEB, 20, 100);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        // --- LIGHTING ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(50, 100, 50);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        dirLight.shadow.camera.near = 0.5;
+        dirLight.shadow.camera.far = 500;
+        dirLight.shadow.camera.left = -100;
+        dirLight.shadow.camera.right = 100;
+        dirLight.shadow.camera.top = 100;
+        dirLight.shadow.camera.bottom = -100;
+        scene.add(dirLight);
+
+        // --- MATERIALS (Unturned Style: Flat Colors) ---
+        const matGrass = new THREE.MeshLambertMaterial({ color: 0x567d46 });
+        const matDirt = new THREE.MeshLambertMaterial({ color: 0x5d4037 });
+        const matWood = new THREE.MeshLambertMaterial({ color: 0x4a3c31 });
+        const matLeaves = new THREE.MeshLambertMaterial({ color: 0x2e8b57 });
+        const matZombieSkin = new THREE.MeshLambertMaterial({ color: 0x6e8c58 }); // Zombie Green
+        const matShirt = new THREE.MeshLambertMaterial({ color: 0x336699 });
+        const matPants = new THREE.MeshLambertMaterial({ color: 0x222222 });
+        const matSkin = new THREE.MeshLambertMaterial({ color: 0xffccaa });
+        const matRoad = new THREE.MeshLambertMaterial({ color: 0x333333 });
+        const matBuilding = new THREE.MeshLambertMaterial({ color: 0xcc5544 }); // Brick red
+
+        // --- WORLD GENERATION ---
+
+        // Ground
+        const groundGeo = new THREE.PlaneGeometry(500, 500);
+        const ground = new THREE.Mesh(groundGeo, matGrass);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Road
+        const roadGeo = new THREE.PlaneGeometry(20, 500);
+        const road = new THREE.Mesh(roadGeo, matRoad);
+        road.rotation.x = -Math.PI / 2;
+        road.position.y = 0.05;
+        road.receiveShadow = true;
+        scene.add(road);
+
+        // Helpers
+        function createTree(x, z) {
+            const group = new THREE.Group();
+            
+            // Trunk
+            const trunkGeo = new THREE.BoxGeometry(1.5, 6, 1.5);
+            const trunk = new THREE.Mesh(trunkGeo, matWood);
+            trunk.position.y = 3;
+            trunk.castShadow = true;
+            trunk.receiveShadow = true;
+            group.add(trunk);
+
+            // Leaves (Blocky)
+            const leavesGeo = new THREE.BoxGeometry(5, 5, 5);
+            const leaves = new THREE.Mesh(leavesGeo, matLeaves);
+            leaves.position.y = 7;
+            leaves.castShadow = true;
+            leaves.receiveShadow = true;
+            group.add(leaves);
+
+            group.position.set(x, 0, z);
+            scene.add(group);
+        }
+
+        // Generate Trees
+        for (let i = 0; i < 60; i++) {
+            let x = (Math.random() - 0.5) * 400;
+            let z = (Math.random() - 0.5) * 400;
+            // Avoid road
+            if (Math.abs(x) < 20) x += 30; 
+            createTree(x, z);
+        }
+
+        // Buildings
+        function createBuilding(x, z) {
+            const bGeo = new THREE.BoxGeometry(20, 15, 20);
+            const bMesh = new THREE.Mesh(bGeo, matBuilding);
+            bMesh.position.set(x, 7.5, z);
+            bMesh.castShadow = true;
+            bMesh.receiveShadow = true;
+            scene.add(bMesh);
+        }
+        createBuilding(-40, -50);
+        createBuilding(50, 20);
+
+        // Characters
+        const zombies = [];
+        const survivors = [];
+
+        function createCharacter(isZombie, x, z) {
+            const group = new THREE.Group();
+
+            // Legs
+            const legGeo = new THREE.BoxGeometry(0.8, 1.5, 0.8);
+            const legL = new THREE.Mesh(legGeo, matPants);
+            legL.position.set(-0.5, 0.75, 0);
+            group.add(legL);
+            const legR = new THREE.Mesh(legGeo, matPants);
+            legR.position.set(0.5, 0.75, 0);
+            group.add(legR);
+
+            // Body
+            const bodyGeo = new THREE.BoxGeometry(2, 2.5, 1);
+            const body = new THREE.Mesh(bodyGeo, isZombie ? matZombieSkin : matShirt);
+            body.position.y = 2.75;
+            body.castShadow = true;
+            group.add(body);
+
+            // Head
+            const headGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+            const head = new THREE.Mesh(headGeo, isZombie ? matZombieSkin : matSkin);
+            head.position.y = 4.6;
+            head.castShadow = true;
+            group.add(head);
+
+            // Arms (Zombie arms stick out)
+            const armGeo = new THREE.BoxGeometry(0.7, 2, 0.7);
+            const armL = new THREE.Mesh(armGeo, isZombie ? matZombieSkin : matSkin);
+            const armR = new THREE.Mesh(armGeo, isZombie ? matZombieSkin : matSkin);
+            
+            if (isZombie) {
+                armL.rotation.x = -Math.PI / 2;
+                armL.position.set(-1.2, 3.5, 1);
+                armR.rotation.x = -Math.PI / 2;
+                armR.position.set(1.2, 3.5, 1);
+            } else {
+                armL.position.set(-1.2, 3, 0);
+                armR.position.set(1.2, 3, 0);
+            }
+            
+            group.add(armL);
+            group.add(armR);
+
+            group.position.set(x, 0, z);
+            scene.add(group);
+            
+            return { mesh: group, speed: isZombie ? 0.05 : 0.1, type: isZombie ? 'zombie' : 'survivor', legs: [legL, legR] };
+        }
+
+        // Spawn Actors
+        for(let i=0; i<15; i++) {
+            zombies.push(createCharacter(true, (Math.random()-0.5)*100, (Math.random()-0.5)*100));
+        }
+        // One main survivor running
+        const mainSurvivor = createCharacter(false, 0, 50);
+        survivors.push(mainSurvivor);
+
+        // --- ANIMATION TIMELINE & CAMERA LOGIC ---
+        
+        // Define Keyframes for Camera
+        // Each phase is roughly 3-4 seconds
+        const timeline = [
+            { t: 0,  cam: {x: 0, y: 50, z: 100}, look: {x: 0, y: 0, z: 0} }, // Intro
+            { t: 4,  cam: {x: 40, y: 20, z: 40}, look: {x: 0, y: 5, z: 0} }, // Shot 1
+            { t: 8,  cam: {x: -30, y: 15, z: -20}, look: {x: 0, y: 5, z: 50} }, // Shot 2
+            { t: 12, cam: {x: 0, y: 80, z: 0}, look: {x: 0, y: 0, z: 0} },   // Overhead
+            { t: 16, cam: {x: 0, y: 10, z: -60}, look: {x: 0, y: 5, z: 0} }, // Low angle
+            { t: 20, cam: {x: 60, y: 30, z: 60}, look: {x: 0, y: 0, z: 0} }, // Final spin start
+            { t: 25, cam: {x: 80, y: 40, z: 80}, look: {x: 0, y: 0, z: 0} }  // Final spin end
+        ];
+
+        let startTime = null;
+        let paused = false;
+        let pausedTime = 0;
+        let offsetTime = 0;
+
+        const overlay = document.getElementById('overlay');
+        const progressBar = document.getElementById('progress-bar');
+        const replayBtn = document.getElementById('replay-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+
+        // Main Loop
+        function animate(timestamp) {
+            if (paused) {
+                requestAnimationFrame(animate);
+                return;
+            }
+
+            if (!startTime) startTime = timestamp;
+            const elapsed = (timestamp - startTime - offsetTime) / 1000; // in seconds
+            const totalDuration = 24;
+
+            if (elapsed > totalDuration) {
+                paused = true;
+                replayBtn.style.display = 'block';
+                pauseBtn.style.display = 'none';
+                return;
+            }
+
+            // Update Progress Bar
+            progressBar.style.width = (elapsed / totalDuration) * 100 + '%';
+
+            // --- ANIMATE CHARACTERS ---
+            const walkCycle = Math.sin(elapsed * 10);
+            
+            // Zombies chase center (rough logic)
+            zombies.forEach(z => {
+                z.mesh.lookAt(mainSurvivor.mesh.position);
+                z.mesh.translateZ(z.speed);
+                z.legs[0].rotation.x = walkCycle * 0.5;
+                z.legs[1].rotation.x = -walkCycle * 0.5;
+            });
+
+            // Survivor runs forward
+            mainSurvivor.mesh.translateZ(0.15);
+            if (mainSurvivor.mesh.position.z > 80) mainSurvivor.mesh.position.z = -80;
+            mainSurvivor.legs[0].rotation.x = walkCycle;
+            mainSurvivor.legs[1].rotation.x = -walkCycle;
+
+
+            // --- CAMERA INTERPOLATION ---
+            // Find current keyframe segment
+            let startKey, endKey;
+            for (let i = 0; i < timeline.length - 1; i++) {
+                if (elapsed >= timeline[i].t && elapsed < timeline[i+1].t) {
+                    startKey = timeline[i];
+                    endKey = timeline[i+1];
+                    break;
+                }
+            }
+
+            if (startKey && endKey) {
+                const segmentDuration = endKey.t - startKey.t;
+                const segmentElapsed = elapsed - startKey.t;
+                const alpha = segmentElapsed / segmentDuration;
+                
+                // Smooth Step interpolation
+                const t = alpha * alpha * (3 - 2 * alpha);
+
+                camera.position.x = THREE.MathUtils.lerp(startKey.cam.x, endKey.cam.x, t);
+                camera.position.y = THREE.MathUtils.lerp(startKey.cam.y, endKey.cam.y, t);
+                camera.position.z = THREE.MathUtils.lerp(startKey.cam.z, endKey.cam.z, t);
+
+                const lookX = THREE.MathUtils.lerp(startKey.look.x, endKey.look.x, t);
+                const lookY = THREE.MathUtils.lerp(startKey.look.y, endKey.look.y, t);
+                const lookZ = THREE.MathUtils.lerp(startKey.look.z, endKey.look.z, t);
+                
+                camera.lookAt(lookX, lookY, lookZ);
+            }
+
+            // --- UI OVERLAYS ---
+            updateOverlay(elapsed);
+
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+
+        function updateOverlay(time) {
+            let content = '';
+            
+            // INTRO (0-4s)
+            if (time < 4) {
+                content = `
+                    <div class="title-slide active">
+                        <div class="big-logo">UNTURNED</div>
+                        <h1>5 Best Hosting Providers</h1>
+                        <h2>Top Gaming Servers In 2025</h2>
+                    </div>
+                `;
+            }
+            // HOST 1 (4-7s)
+            else if (time >= 4 && time < 7) {
+                content = getHostHTML(0);
+            }
+            // HOST 2 (7-10s)
+            else if (time >= 7 && time < 10) {
+                content = getHostHTML(1);
+            }
+            // HOST 3 (10-13s)
+            else if (time >= 10 && time < 13) {
+                content = getHostHTML(2);
+            }
+            // HOST 4 (13-16s)
+            else if (time >= 13 && time < 16) {
+                content = getHostHTML(3);
+            }
+            // HOST 5 (16-19s)
+            else if (time >= 16 && time < 19) {
+                content = getHostHTML(4);
+            }
+            // OUTRO (19s+)
+            else {
+                content = `
+                    <div class="title-slide active">
+                        <div class="big-logo">THANKS FOR WATCHING</div>
+                        <h2>Don't forget to Like & Subscribe!</h2>
+                        <h2 style="color:#FFD700; margin-top:20px;">Play Unturned Today</h2>
+                    </div>
+                `;
+            }
+
+            overlay.innerHTML = content;
+        }
+
+        function getHostHTML(index) {
+            const h = providers[index];
+            return `
+                <div class="title-slide active">
+                    <div class="host-rank">${h.rank}</div>
+                    <div class="host-name">${h.name}</div>
+                    <div class="host-feature">${h.feature}</div>
+                </div>
+            `;
+        }
+
+        // --- EVENTS ---
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        let pauseStart = 0;
+        pauseBtn.addEventListener('click', () => {
+            paused = !paused;
+            pauseBtn.innerText = paused ? "Resume" : "Pause";
+            if (paused) {
+                pauseStart = performance.now();
+            } else {
+                offsetTime += (performance.now() - pauseStart);
+                requestAnimationFrame(animate);
+            }
+        });
+
+        replayBtn.addEventListener('click', () => {
+            startTime = null;
+            offsetTime = 0;
+            paused = false;
+            replayBtn.style.display = 'none';
+            pauseBtn.style.display = 'block';
+            
+            // Reset positions
+            zombies.forEach(z => {
+                z.mesh.position.set((Math.random()-0.5)*100, 0, (Math.random()-0.5)*100);
+            });
+            mainSurvivor.mesh.position.set(0,0,50);
+
+            requestAnimationFrame(animate);
+        });
+
+        // Start
+        requestAnimationFrame(animate);
+
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+let recording = false;
+let mediaRecorder;
+let chunks = [];
+
+// Create download button
+const downloadBtn = document.createElement("button");
+downloadBtn.innerText = "Download Video";
+downloadBtn.style.marginLeft = "10px";
+document.getElementById("controls").appendChild(downloadBtn);
+
+// Target container (canvas + overlays)
+const videoContainer = document.getElementById("video-container");
+
+// Composite canvas (final output)
+const finalCanvas = document.createElement("canvas");
+finalCanvas.width = window.innerWidth;
+finalCanvas.height = window.innerHeight;
+const finalCtx = finalCanvas.getContext("2d");
+
+async function drawFrame() {
+    if (!recording) return;
+
+    // Draw Three.js canvas first
+    finalCtx.drawImage(renderer.domElement, 0, 0, finalCanvas.width, finalCanvas.height);
+
+    // Draw HTML overlays using html2canvas
+    const overlayCanvas = await html2canvas(videoContainer, {
+        backgroundColor: null,
+        logging: false,
+        scale: 1
+    });
+
+    finalCtx.drawImage(overlayCanvas, 0, 0);
+
+    requestAnimationFrame(drawFrame);
+}
+
+function startRecording() {
+    recording = true;
+
+    const stream = finalCanvas.captureStream(30); // 30 FPS
+    mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+
+    chunks = [];
+    mediaRecorder.ondataavailable = e => chunks.push(e.data);
+
+    mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: "video/webm" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "unturned_full_video.webm";
+        a.click();
+    };
+
+    mediaRecorder.start();
+    drawFrame();
+
+    downloadBtn.innerText = "Stop Recording";
+}
+
+function stopRecording() {
+    recording = false;
+    mediaRecorder.stop();
+    downloadBtn.innerText = "Download Video";
+}
+
+// Button logic
+downloadBtn.addEventListener("click", () => {
+    if (!recording) startRecording();
+    else stopRecording();
+});
+</script>
+
+</body>
+</html>
